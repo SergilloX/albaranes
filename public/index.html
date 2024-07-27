@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Control de Albaranes</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="container">
+    <h1>Control de Albaranes</h1>
+    <form id="albaran-form">
+      <label for="albaran">Albarán:</label>
+      <input type="text" id="albaran" name="albaran" required>
+      <label for="fecha">Fecha:</label>
+      <input type="date" id="fecha" name="fecha" required>
+      <label for="kilos">Kilos:</label>
+      <input type="number" id="kilos" name="kilos" step="0.01" required>
+      <label for="importe">Importe:</label>
+      <input type="number" id="importe" name="importe" step="0.01" required>
+      <button type="submit">Añadir Albarán</button>
+    </form>
+    <h2>Lista de Albaranes</h2>
+    <table>
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Albarán</th>
+          <th>Fecha</th>
+          <th>Kilos</th>
+          <th>Importe</th>
+        </tr>
+      </thead>
+      <tbody id="albaranes-list">
+        <!-- Aquí se mostrarán los albaranes -->
+      </tbody>
+    </table>
+  </div>
+  <script src="app.js"></script>
+</body>
+</html>
