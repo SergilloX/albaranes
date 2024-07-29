@@ -36,12 +36,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
   // Función para obtener y mostrar los gastos
   function fetchGastos() {
-    const token = localStorage.getItem('token');
-    fetch('/api/gastos', {
-      headers: {
-        'Authorization': `Bearer ${token}`
-      }
-    })
+    fetch('/api/gastos')
       .then(response => response.json())
       .then(data => {
         // Agrupar los gastos por proveedor
@@ -97,12 +92,10 @@ document.addEventListener('DOMContentLoaded', function() {
       importe: formData.get('importe').replace(',', '.')
     };
 
-    const token = localStorage.getItem('token');
     fetch('/api/gastos', {
       method: 'POST',
       headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${token}`
+        'Content-Type': 'application/json'
       },
       body: JSON.stringify(gastoData)
     })
@@ -119,12 +112,8 @@ document.addEventListener('DOMContentLoaded', function() {
   document.addEventListener('click', function(e) {
     if (e.target && e.target.classList.contains('delete-gasto-btn')) {
       const gastoId = e.target.getAttribute('data-id');
-      const token = localStorage.getItem('token');
       fetch(`/api/gastos/${gastoId}`, {
-        method: 'DELETE',
-        headers: {
-          'Authorization': `Bearer ${token}`
-        }
+        method: 'DELETE'
       })
       .then(() => {
         fetchGastos();

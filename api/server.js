@@ -1,128 +1,220 @@
 const express = require('express');
-const { Pool } = require('pg');
+const sqlite3 = require('sqlite3').verbose();
 const bodyParser = require('body-parser');
-const bcrypt = require('bcryptjs');
-const jwt = require('jsonwebtoken');
-const { check, validationResult } = require('express-validator');
-require('dotenv').config();
-
 const app = express();
-const port = process.env.PORT || 3001;
+const port = 3001;
 
-const pool = new Pool({
-  connectionString: process.env.DATABASE_URL,
-  ssl: {
-    rejectUnauthorized: false
-  }
-});
-
+// Configurar middleware
 app.use(bodyParser.json());
 app.use(express.static('public'));
 
-// Middleware de autenticación JWT
-const authenticateJWT = (req, res, next) => {
-  const token = req.headers.authorization && req.headers.authorization.split(' ')[1];
-  if (token) {
-    jwt.verify(token, process.env.JWT_SECRET, (err, user) => {
-      if (err) {
-        return res.sendStatus(403);
-      }
-      req.user = user;
-      next();
-    });
+// Conectar a la base de datos SQLite
+const absolutePath = path.join(__dirname, 'albaranes.db');
+let db = new sqlite3.Database(absolutePath, (err) => {
+  if (err) {
+    console.error('Error al conectar a la base de datos:', err.message);
   } else {
-    res.sendStatus(401);
-  }
-};
-
-// Rutas de registro y login
-app.post('/api/register', [
-  check('username').not().isEmpty(),
-  check('password').isLength({ min: 6 })
-], async (req, res) => {
-  const errors = validationResult(req);
-  if (!errors.isEmpty()) {
-    return res.status(400).json({ errors: errors.array() });
-  }
-
-  const { username, password } = req.body;
-  const hashedPassword = await bcrypt.hash(password, 10);
-
-  try {
-    const result = await pool.query(
-      'INSERT INTO users (username, password) VALUES ($1, $2) RETURNING *',
-      [username, hashedPassword]
-    );
-    res.json({ user: result.rows[0] });
-  } catch (err) {
-    res.status(500).json({ error: err.message });
+    console.log('Conectado a la base de datos SQLite.');
   }
 });
 
-app.post('/api/login', async (req, res) => {
-  const { username, password } = req.body;
-
-  try {
-    const result = await pool.query('SELECT * FROM users WHERE username = $1', [username]);
-    if (result.rows.length === 0) {
-      return res.status(401).json({ error: 'Credenciales inválidas' });
+// Agregar columna invernadero a la tabla albaranes si no existe
+db.run(`ALTER TABLE albaranes ADD COLUMN invernadero TEXT`, (err) => {
+  if (err) {
+    if (err.message.includes("duplicate column name")) {
+      console.log('La columna invernadero ya existe.');
+    } else {
+      console.error('Error al agregar la columna invernadero:', err.message);
     }
+  } else {
+    console.log('Columna invernadero agregada a la tabla albaranes.');
+  }
+});
 
-    const user = result.rows[0];
-    const validPassword = await bcrypt.compare(password, user.password);
-    if (!validPassword) {
-      return res.status(401).json({ error: 'Credenciales inválidas' });
+// Crear tabla albaranes si no existe
+db.run(`CREATE TABLE IF NOT EXISTS albaranes (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  albaran TEXT NOT NULL,
+  fecha TEXT NOT NULL,
+  kilos REAL NOT NULL,
+  importe REAL NOT NULL,
+  invernadero TEXT
+)`, (err) => {
+  if (err) {
+    console.error('Error al crear la tabla de albaranes:', err.message);
+  } else {
+    console.log('Tabla de albaranes creada o ya existe.');
+  }
+});
+
+// Crear tabla cobros si no existe
+db.run(`CREATE TABLE IF NOT EXISTS cobros (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  fecha TEXT NOT NULL,
+  importe REAL NOT NULL
+)`, (err) => {
+  if (err) {
+    console.error('Error al crear la tabla de cobros:', err.message);
+  } else {
+    console.log('Tabla de cobros creada o ya existe.');
+  }
+});
+
+// Crear tabla gastos si no existe
+db.run(`CREATE TABLE IF NOT EXISTS gastos (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  concepto TEXT NOT NULL,
+  fecha TEXT NOT NULL,
+  importe REAL NOT NULL
+)`, (err) => {
+  if (err) {
+    console.error('Error al crear la tabla de gastos:', err.message);
+  } else {
+    console.log('Tabla de gastos creada o ya existe.');
+  }
+});
+
+// Ruta para obtener todos los albaranes
+app.get('/api/albaranes', (req, res) => {
+  const sql = 'SELECT * FROM albaranes ORDER BY id';
+  db.all(sql, [], (err, rows) => {
+    if (err) {
+      res.status(400).json({ error: err.message });
+      return;
     }
-
-    const token = jwt.sign({ username: user.username }, process.env.JWT_SECRET, { expiresIn: '1h' });
-    res.json({ token });
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
+    res.json({ data: rows });
+  });
 });
 
-// Rutas protegidas
-app.get('/api/gastos', authenticateJWT, async (req, res) => {
-  try {
-    const result = await pool.query('SELECT * FROM gastos ORDER BY id');
-    res.json({ data: result.rows });
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
+// Ruta para añadir un nuevo albarán
+app.post('/api/albaranes', (req, res) => {
+  const { albaran, fecha, kilos, importe, invernadero } = req.body;
+  const sql = 'INSERT INTO albaranes (albaran, fecha, kilos, importe, invernadero) VALUES (?, ?, ?, ?, ?)';
+  db.run(sql, [albaran, fecha, kilos, importe, invernadero], function(err) {
+    if (err) {
+      res.status(400).json({ error: err.message });
+      return;
+    }
+    res.json({ data: { id: this.lastID, albaran, fecha, kilos, importe, invernadero } });
+  });
 });
 
-app.post('/api/gastos', authenticateJWT, async (req, res) => {
+// Ruta para eliminar un albarán
+app.delete('/api/albaranes/:id', (req, res) => {
+  const id = req.params.id;
+  const sql = 'DELETE FROM albaranes WHERE id = ?';
+  db.run(sql, [id], function(err) {
+    if (err) {
+      res.status(400).json({ error: err.message });
+      return;
+    }
+    res.json({ message: 'Albarán eliminado' });
+  });
+});
+
+// Ruta para obtener todos los cobros
+app.get('/api/cobros', (req, res) => {
+  const sql = 'SELECT * FROM cobros ORDER BY id';
+  db.all(sql, [], (err, rows) => {
+    if (err) {
+      res.status(400).json({ error: err.message });
+      return;
+    }
+    res.json({ data: rows });
+  });
+});
+
+// Ruta para añadir un nuevo cobro
+app.post('/api/cobros', (req, res) => {
+  const { fecha, importe } = req.body;
+  const sql = 'INSERT INTO cobros (fecha, importe) VALUES (?, ?)';
+  db.run(sql, [fecha, importe], function(err) {
+    if (err) {
+      res.status(400).json({ error: err.message });
+      return;
+    }
+    res.json({ data: { id: this.lastID, fecha, importe } });
+  });
+});
+
+// Ruta para eliminar un cobro
+app.delete('/api/cobros/:id', (req, res) => {
+  const id = req.params.id;
+  const sql = 'DELETE FROM cobros WHERE id = ?';
+  db.run(sql, [id], function(err) {
+    if (err) {
+      res.status(400).json({ error: err.message });
+      return;
+    }
+    res.json({ message: 'Cobro eliminado' });
+  });
+});
+
+// Ruta para obtener todos los gastos
+app.get('/api/gastos', (req, res) => {
+  const sql = 'SELECT * FROM gastos ORDER BY id';
+  db.all(sql, [], (err, rows) => {
+    if (err) {
+      res.status(400).json({ error: err.message });
+      return;
+    }
+    res.json({ data: rows });
+  });
+});
+
+// Ruta para añadir un nuevo gasto
+app.post('/api/gastos', (req, res) => {
   const { concepto, fecha, importe } = req.body;
-  try {
-    const result = await pool.query(
-      'INSERT INTO gastos (concepto, fecha, importe) VALUES ($1, $2, $3) RETURNING *',
-      [concepto, fecha, importe]
-    );
-    res.json({ data: result.rows[0] });
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
+  const sql = 'INSERT INTO gastos (concepto, fecha, importe) VALUES (?, ?, ?)';
+  db.run(sql, [concepto, fecha, importe], function(err) {
+    if (err) {
+      res.status(400).json({ error: err.message });
+      return;
+    }
+    res.json({ data: { id: this.lastID, concepto, fecha, importe } });
+  });
 });
 
 // Ruta para añadir múltiples gastos
-app.post('/api/gastos/multiple', authenticateJWT, async (req, res) => {
+app.post('/api/gastos/multiple', (req, res) => {
   const gastos = req.body;
-  const sql = 'INSERT INTO gastos (concepto, fecha, importe) VALUES ($1, $2, $3)';
-  const client = await pool.connect();
+  const sql = 'INSERT INTO gastos (concepto, fecha, importe) VALUES (?, ?, ?)';
+  const stmt = db.prepare(sql);
 
-  try {
-    await client.query('BEGIN');
+  db.serialize(() => {
+    db.run("BEGIN TRANSACTION");
     for (const gasto of gastos) {
-      await client.query(sql, [gasto.concepto, gasto.fecha, gasto.importe]);
+      stmt.run(gasto.concepto, gasto.fecha, gasto.importe, (err) => {
+        if (err) {
+          db.run("ROLLBACK");
+          res.status(400).json({ error: err.message });
+          return;
+        }
+      });
     }
-    await client.query('COMMIT');
-    res.json({ message: 'Gastos añadidos correctamente' });
-  } catch (err) {
-    await client.query('ROLLBACK');
-    res.status(500).json({ error: err.message });
-  } finally {
-    client.release();
-  }
+    db.run("COMMIT", (err) => {
+      if (err) {
+        res.status(400).json({ error: err.message });
+      } else {
+        res.json({ message: 'Gastos añadidos correctamente' });
+      }
+    });
+  });
+
+  stmt.finalize();
+});
+
+// Ruta para eliminar un gasto
+app.delete('/api/gastos/:id', (req, res) => {
+  const id = req.params.id;
+  const sql = 'DELETE FROM gastos WHERE id = ?';
+  db.run(sql, [id], function(err) {
+    if (err) {
+      res.status(400).json({ error: err.message });
+      return;
+    }
+    res.json({ message: 'Gasto eliminado' });
+  });
 });
 
 // Iniciar el servidor

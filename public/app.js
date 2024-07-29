@@ -25,12 +25,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
   // Función para actualizar el pendiente de cobro
   function updatePendienteCobro() {
-    const token = localStorage.getItem('token');
-    fetch('/api/albaranes', {
-      headers: {
-        'Authorization': `Bearer ${token}`
-      }
-    })
+    fetch('/api/albaranes')
       .then(response => response.json())
       .then(data => {
         let totalImporte = 0;
@@ -39,11 +34,7 @@ document.addEventListener('DOMContentLoaded', function() {
         });
 
         const totalAjustado = totalImporte * 0.88 * 0.98;
-        fetch('/api/cobros', {
-          headers: {
-            'Authorization': `Bearer ${token}`
-          }
-        })
+        fetch('/api/cobros')
           .then(response => response.json())
           .then(cobrosData => {
             let totalCobros = 0;
@@ -59,12 +50,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
   // Función para obtener y mostrar los albaranes
   function fetchAlbaranes() {
-    const token = localStorage.getItem('token');
-    fetch('/api/albaranes', {
-      headers: {
-        'Authorization': `Bearer ${token}`
-      }
-    })
+    fetch('/api/albaranes')
       .then(response => response.json())
       .then(data => {
         albaranesList.innerHTML = '';
@@ -107,12 +93,10 @@ document.addEventListener('DOMContentLoaded', function() {
       albaranData[key] = value || null; // Asegurarse de capturar el valor del invernadero, aunque sea nulo
     });
 
-    const token = localStorage.getItem('token');
     fetch('/api/albaranes', {
       method: 'POST',
       headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${token}`
+        'Content-Type': 'application/json'
       },
       body: JSON.stringify(albaranData)
     })
@@ -127,12 +111,8 @@ document.addEventListener('DOMContentLoaded', function() {
   document.addEventListener('click', function(e) {
     if (e.target && e.target.classList.contains('delete-btn')) {
       const albaranId = e.target.getAttribute('data-id');
-      const token = localStorage.getItem('token');
       fetch(`/api/albaranes/${albaranId}`, {
-        method: 'DELETE',
-        headers: {
-          'Authorization': `Bearer ${token}`
-        }
+        method: 'DELETE'
       })
       .then(() => {
         fetchAlbaranes(); // Recalcular los totales después de eliminar
@@ -149,12 +129,10 @@ document.addEventListener('DOMContentLoaded', function() {
       cobroData[key] = value;
     });
 
-    const token = localStorage.getItem('token');
     fetch('/api/cobros', {
       method: 'POST',
       headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${token}`
+        'Content-Type': 'application/json'
       },
       body: JSON.stringify(cobroData)
     })
@@ -167,12 +145,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
   // Función para obtener y mostrar los cobros
   function fetchCobros() {
-    const token = localStorage.getItem('token');
-    fetch('/api/cobros', {
-      headers: {
-        'Authorization': `Bearer ${token}`
-      }
-    })
+    fetch('/api/cobros')
       .then(response => response.json())
       .then(data => {
         cobrosList.innerHTML = '';
@@ -196,12 +169,8 @@ document.addEventListener('DOMContentLoaded', function() {
   document.addEventListener('click', function(e) {
     if (e.target && e.target.classList.contains('delete-cobro-btn')) {
       const cobroId = e.target.getAttribute('data-id');
-      const token = localStorage.getItem('token');
       fetch(`/api/cobros/${cobroId}`, {
-        method: 'DELETE',
-        headers: {
-          'Authorization': `Bearer ${token}`
-        }
+        method: 'DELETE'
       })
       .then(() => {
         fetchCobros(); // Recalcular el pendiente de cobro después de eliminar
