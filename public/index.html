@@ -7,35 +7,131 @@
   <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-  <div class="container">
-    <h1>Control de Albaranes</h1>
-    <form id="albaran-form">
-      <label for="albaran">Albarán:</label>
-      <input type="text" id="albaran" name="albaran" required>
-      <label for="fecha">Fecha:</label>
-      <input type="date" id="fecha" name="fecha" required>
-      <label for="kilos">Kilos:</label>
-      <input type="number" id="kilos" name="kilos" step="0.01" required>
-      <label for="importe">Importe:</label>
-      <input type="number" id="importe" name="importe" step="0.01" required>
-      <button type="submit">Añadir Albarán</button>
-    </form>
-    <h2>Lista de Albaranes</h2>
-    <table>
-      <thead>
-        <tr>
-          <th>ID</th>
-          <th>Albarán</th>
-          <th>Fecha</th>
-          <th>Kilos</th>
-          <th>Importe</th>
-        </tr>
-      </thead>
-      <tbody id="albaranes-list">
-        <!-- Aquí se mostrarán los albaranes -->
-      </tbody>
-    </table>
-  </div>
-  <script src="app.js"></script>
+  <header>
+    <nav>
+      <ul>
+        <li><a href="#albaranes" class="active">Albaranes</a></li>
+        <li><a href="#gastos">Gastos</a></li>
+        <li><a href="#cobros">Cobros</a></li>
+      </ul>
+    </nav>
+  </header>
+
+  <main>
+    <!-- Sección de Albaranes -->
+    <section id="albaranes" class="page">
+      <h1>Control de Albaranes</h1>
+      <form id="albaran-form">
+        <label for="albaran">Albarán:</label>
+        <input type="text" id="albaran" name="albaran" required>
+        <label for="fecha">Fecha:</label>
+        <input type="date" id="fecha" name="fecha" required>
+        <label for="kilos">Kilos:</label>
+        <input type="number" id="kilos" name="kilos" step="0.01" required>
+        <label for="importe">Importe:</label>
+        <input type="number" id="importe" name="importe" step="0.01" required>
+        <label for="invernadero">Invernadero:</label>
+        <select id="invernadero" name="invernadero">
+          <option value=""></option>
+          <option value="Viejo">Viejo</option>
+          <option value="Nuevo">Nuevo</option>
+          <option value="Casa">Casa</option>
+        </select>
+        <button type="submit">Añadir Albarán</button>
+      </form>
+      <div id="totales">
+        <h2>Totales</h2>
+        <p>Total Kilos: <span id="total-kilos">0</span></p>
+        <p>Total Importe: <span id="total-importe">0</span></p>
+      </div>
+      <h2>Lista de Albaranes</h2>
+      <table>
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Albarán</th>
+            <th>Fecha</th>
+            <th>Kilos</th>
+            <th>Importe</th>
+            <th>Invernadero</th>
+            <th>Acciones</th>
+          </tr>
+        </thead>
+        <tbody id="albaranes-list">
+          <!-- Aquí se mostrarán los albaranes -->
+        </tbody>
+      </table>
+    </section>
+
+    <!-- Sección de Gastos -->
+    <section id="gastos" class="page" style="display: none;">
+      <h1>Gastos</h1>
+      <form id="gasto-form">
+        <label for="concepto">Concepto:</label>
+        <select id="concepto" name="concepto" required>
+          <option value="">Seleccionar proveedor</option>
+          <!-- Listado de proveedores... -->
+          <option value="nuevo">Añadir nuevo proveedor</option>
+        </select>
+        <label for="nuevo-proveedor" id="nuevo-proveedor-label" style="display:none;">Nuevo Proveedor:</label>
+        <input type="text" id="nuevo-proveedor" name="nuevo-proveedor" style="display:none;">
+        <label for="fecha-gasto">Fecha:</label>
+        <input type="date" id="fecha-gasto" name="fecha" required>
+        <label for="importe-gasto">Importe:</label>
+        <input type="number" id="importe-gasto" name="importe" step="0.01" required>
+        <button type="submit">Añadir Gasto</button>
+      </form>
+      <div id="total-gastos">
+        <h2>Total Gastos</h2>
+        <p>Total Importe: <span id="total-gasto-importe">0,00 €</span></p>
+      </div>
+      <h2>Lista de Gastos</h2>
+      <table>
+        <thead>
+          <tr>
+            <th>Concepto</th>
+            <th>Fecha</th>
+            <th>Importe</th>
+            <th>Acciones</th>
+          </tr>
+        </thead>
+        <tbody id="gastos-list">
+          <!-- Aquí se mostrarán los gastos -->
+        </tbody>
+      </table>
+    </section>
+
+    <!-- Sección de Cobros -->
+    <section id="cobros" class="page" style="display: none;">
+      <h1>Cobros</h1>
+      <div id="pendiente">
+        <p>Pendiente de cobro: <span id="pendiente-cobro">436.084,79 €</span></p>
+      </div>
+      <form id="cobro-form">
+        <label for="cobro-fecha">Fecha:</label>
+        <input type="date" id="cobro-fecha" name="fecha" required>
+        <label for="cobro-importe">Importe:</label>
+        <input type="number" id="cobro-importe" name="importe" step="0.01" required>
+        <button type="submit">Añadir Cobro</button>
+      </form>
+      <h2>Lista de Cobros</h2>
+      <table>
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Fecha</th>
+            <th>Importe</th>
+            <th>Acciones</th>
+          </tr>
+        </thead>
+        <tbody id="cobros-list">
+          <!-- Aquí se mostrarán los cobros -->
+        </tbody>
+      </table>
+    </section>
+  </main>
+
+  <script src="app.js" defer></script>
+  <script src="gastos.js" defer></script>
 </body>
 </html>

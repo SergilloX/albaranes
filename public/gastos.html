@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Gastos</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <header>
+    <nav>
+      <ul>
+        <li><a href="index.html">Albaranes</a></li>
+        <li><a href="gastos.html" class="active">Gastos</a></li>
+        <li><a href="cobros.html">Cobros</a></li>
+      </ul>
+    </nav>
+  </header>
+
+  <main>
+    <section id="gastos">
+      <h1>Gastos</h1>
+      <form id="gasto-form">
+        <label for="concepto">Concepto:</label>
+        <select id="concepto" name="concepto" required>
+          <option value="Proveedor 1">Proveedor 1</option>
+          <option value="Proveedor 2">Proveedor 2</option>
+        </select>
+        <label for="fecha-gasto">Fecha:</label>
+        <input type="date" id="fecha-gasto" name="fecha" required>
+        <label for="importe-gasto">Importe:</label>
+        <input type="number" id="importe-gasto" name="importe" step="0.01" required>
+        <button type="submit">Añadir Gasto</button>
+      </form>
+      <div id="total-gastos">
+        <h2>Total Gastos</h2>
+        <p>Total Importe: <span id="total-gasto-importe">0,00 €</span></p>
+      </div>
+      <h2>Lista de Gastos</h2>
+      <table>
+        <thead>
+          <tr>
+            <th>Concepto</th>
+            <th>Fecha</th>
+            <th>Importe</th>
+            <th>Acciones</th>
+          </tr>
+        </thead>
+        <tbody id="gastos-list">
+          <!-- Aquí se mostrarán los gastos -->
+        </tbody>
+      </table>
+    </section>
+  </main>
+
+  <script src="gastos.js" defer></script>
+</body>
+</html>

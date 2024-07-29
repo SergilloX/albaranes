@@ -5,13 +5,42 @@ body {
   padding: 20px;
 }
 
-.container {
-  max-width: 800px;
-  margin: 0 auto;
-  background: #fff;
-  padding: 20px;
+header {
+  background-color: #333;
+  color: #fff;
+  padding: 10px;
   border-radius: 8px;
-  box-shadow: 0 0 10px rgba(0,0,0,0.1);
+  margin-bottom: 20px;
+}
+
+nav ul {
+  list-style-type: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  justify-content: center;
+}
+
+nav ul li {
+  margin-right: 10px;
+}
+
+nav a {
+  color: #fff;
+  text-decoration: none;
+  padding: 10px 20px;
+  display: block;
+  border-radius: 4px;
+}
+
+nav a.active {
+  background-color: #555;
+}
+
+main {
+  padding: 20px;
+  background: #fff;
+  border-radius: 8px;
 }
 
 h1, h2 {
@@ -20,6 +49,9 @@ h1, h2 {
 
 form {
   margin-bottom: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
 }
 
 label {
@@ -27,12 +59,22 @@ label {
   margin-bottom: 5px;
 }
 
-input {
-  width: calc(100% - 22px);
+input, select {
+  width: 100%;
   padding: 10px;
   margin-bottom: 10px;
   border: 1px solid #ccc;
   border-radius: 4px;
+  font-size: 16px;
+  box-sizing: border-box; /* Asegura que el padding no expanda el ancho del elemento */
+}
+
+select {
+  appearance: none;
+  background: url('data:image/svg+xml;charset=US-ASCII,<svg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20width%3D%2210%22%20height%3D%225%22><path%20fill%3D%22%23333%22%20d%3D%22M0%200l5%205%205-5z%22/></svg>') no-repeat right 10px center;
+  background-color: white; /* Asegura que el fondo del select sea blanco */
+  background-size: 10px;
+  padding-right: 30px; /* Espacio adicional para la flecha */
 }
 
 button {
@@ -65,4 +107,25 @@ th, td {
 
 th {
   background-color: #f2f2f2;
+}
+
+/* Ocultar secciones por defecto */
+.page {
+  display: none;
+}
+
+/* Estilos adicionales para mejorar visualmente el formulario de gastos */
+#gasto-form {
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+#total-gastos {
+  margin-top: 30px;
+}
+
+#total-gastos p {
+  font-size: 18px;
+  font-weight: bold;
+  text-align: center;
 }
