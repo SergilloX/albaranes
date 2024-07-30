@@ -52,6 +52,8 @@ form {
   display: flex;
   flex-direction: column;
   gap: 10px;
+  max-width: 600px;
+  margin: 0 auto; /* Centrar todos los formularios */
 }
 
 label {
@@ -115,16 +117,11 @@ th {
 }
 
 /* Estilos adicionales para mejorar visualmente el formulario de gastos */
-#gasto-form {
-  max-width: 600px;
-  margin: 0 auto;
-}
-
-#total-gastos {
+#total-gastos, #totales, #pendiente {
   margin-top: 30px;
 }
 
-#total-gastos p {
+#total-gastos p, #totales p, #pendiente p {
   font-size: 18px;
   font-weight: bold;
   text-align: center;

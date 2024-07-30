@@ -3,6 +3,7 @@ const sqlite3 = require('sqlite3').verbose();
 const bodyParser = require('body-parser');
 const app = express();
 const port = 3001;
+const path = require('path');
 
 // Configurar middleware
 app.use(bodyParser.json());
